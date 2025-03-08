@@ -5,6 +5,17 @@ package calculator;
 service CalculatorService {
     // unary API
     rpc Sum (SumRequest) returns (SumResponse) {};
+
+    // streaming API
+    rpc PrimeNumberDecomposition (PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse);
+}
+
+message PrimeNumberDecompositionRequest {
+    int64 number = 1;
+}
+
+message PrimeNumberDecompositionResponse {
+    int64 prime_factor = 1;
 }
 
 message SumRequest {

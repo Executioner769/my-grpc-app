@@ -63,6 +63,36 @@ function callSum(num1, num2) {
     return result;
 }
 
-function main() {}
+function callPrimeNumberDecomposition(number) {
+    const client = new calculatorService.CalculatorServiceClient(
+        "localhost:50051",
+        grpc.credentials.createInsecure()
+    );
+
+    const request = new calculator.PrimeNumberDecompositionRequest();
+    request.setNumber(number);
+
+    const call = client.primeNumberDecomposition(request, () => {});
+
+    call.on("data", (response) => {
+        console.log("Prime Factor: " + response.getPrimeFactor());
+    });
+
+    call.on("status", (status) => {
+        console.log(status);
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        console.log("Streaming Ended!");
+    });
+}
+
+function main() {
+    callPrimeNumberDecomposition(12243678);
+}
 
 main();

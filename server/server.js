@@ -14,6 +14,39 @@ function sum(call, callback) {
     callback(null, sumResponse);
 }
 
+function primeNumberDecomposition(call, callback) {
+    let number = call.request.getNumber();
+
+    // validate the number
+    // if number is less than 2, then we return -1
+    if (number < 2) {
+        let primeNumberDecompositionResponse =
+            new calculator.PrimeNumberDecompositionResponse();
+        primeNumberDecompositionResponse.setPrimeFactor(-1);
+        call.write(primeNumberDecompositionResponse);
+        call.end();
+
+        return;
+    }
+
+    let divisor = 2;
+
+    while (number > 1) {
+        if (number % divisor === 0) {
+            let primeNumberDecompositionResponse =
+                new calculator.PrimeNumberDecompositionResponse();
+            primeNumberDecompositionResponse.setPrimeFactor(divisor);
+            call.write(primeNumberDecompositionResponse);
+
+            number = number / divisor;
+        } else {
+            divisor++;
+        }
+    }
+
+    call.end(); // we have sent all the prime factors
+}
+
 function greetManyTimes(call, callback) {
     const name =
         call.request.getGreeting().getFirstName() +
@@ -37,7 +70,10 @@ function greetManyTimes(call, callback) {
 
 function main() {
     const server = new grpc.Server();
-    server.addService(calculatorService.CalculatorServiceService, { sum: sum });
+    server.addService(calculatorService.CalculatorServiceService, {
+        sum: sum,
+        primeNumberDecomposition: primeNumberDecomposition,
+    });
     server.addService(greetService.GreetServiceService, {
         greetManyTimes: greetManyTimes,
     });
