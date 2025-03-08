@@ -1,0 +1,42 @@
+[
+    {
+        "firstName": "Christopher",
+        "lastName": "Nolan"
+    },
+    {
+        "firstName": "Steven",
+        "lastName": "Spielberg"
+    },
+    {
+        "firstName": "Martin",
+        "lastName": "Scorsese"
+    },
+    {
+        "firstName": "Quentin",
+        "lastName": "Tarantino"
+    },
+    {
+        "firstName": "James",
+        "lastName": "Cameron"
+    },
+    {
+        "firstName": "Ridley",
+        "lastName": "Scott"
+    },
+    {
+        "firstName": "Alfred",
+        "lastName": "Hitchcock"
+    },
+    {
+        "firstName": "Stanley",
+        "lastName": "Kubrick"
+    },
+    {
+        "firstName": "David",
+        "lastName": "Fincher"
+    },
+    {
+        "firstName": "Wes",
+        "lastName": "Anderson"
+    }
+]

@@ -68,6 +68,28 @@ function greetManyTimes(call, callback) {
         }, 1000);
 }
 
+function longGreet(call, callback) {
+    call.on("data", (request) => {
+        const fullName =
+            request.getGreeting().getFirstName() +
+            " " +
+            request.getGreeting().getLastName();
+
+        console.log("Hello " + fullName);
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        const response = new greet.LongGreetResponse();
+        response.setResult("Long greet client streaming ...");
+
+        callback(null, response);
+    });
+}
+
 function main() {
     const server = new grpc.Server();
     server.addService(calculatorService.CalculatorServiceService, {
@@ -76,6 +98,7 @@ function main() {
     });
     server.addService(greetService.GreetServiceService, {
         greetManyTimes: greetManyTimes,
+        longGreet: longGreet,
     });
     server.bindAsync(
         "127.0.0.1:50051",
