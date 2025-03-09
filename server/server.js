@@ -113,6 +113,41 @@ function longGreet(call, callback) {
     });
 }
 
+async function sleep(interval) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), interval);
+    });
+}
+
+async function greetEveryone(call, callback) {
+    call.on("data", (response) => {
+        const fullName =
+            response.getGreeting().getFirstName() +
+            " " +
+            response.getGreeting().getLastName();
+
+        console.log(`Hello ${fullName}`);
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        console.log("Server The End");
+    });
+
+    for (let i = 0; i < 10; ++i) {
+        const response = new greet.GreetEveryoneResponse();
+        response.setResult("Lalisa Manobal");
+
+        call.write(response);
+        await sleep(1500);
+    }
+
+    call.end();
+}
+
 function main() {
     const server = new grpc.Server();
     server.addService(calculatorService.CalculatorServiceService, {
@@ -123,6 +158,7 @@ function main() {
     server.addService(greetService.GreetServiceService, {
         greetManyTimes: greetManyTimes,
         longGreet: longGreet,
+        greetEveryone: greetEveryone,
     });
     server.bindAsync(
         "127.0.0.1:50051",

@@ -166,10 +166,61 @@ function callComputeAverage(numbers) {
     });
 }
 
+async function sleep(interval) {
+    return new Promise((resolve) => {
+        setTimeout(() => resolve(), interval);
+    });
+}
+
+async function callGreetEveryone() {
+    const client = new greetService.GreetServiceClient(
+        "localhost:50051",
+        grpc.credentials.createInsecure()
+    );
+
+    const request = new greet.GreetEveryoneRequest();
+
+    const call = client.greetEveryone(request, (error, response) => {
+        if (!error) {
+            console.log("Server Response: " + response);
+        } else {
+            console.error(error);
+        }
+    });
+
+    call.on("data", (response) => {
+        console.log("Hello ! " + response.getResult());
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        console.log("Client The End");
+    });
+
+    for (let i = 0; i < 10; i++) {
+        const greeting = new greet.Greeting();
+        greeting.setFirstName("Jennie");
+        greeting.setLastName("Ruby Jane");
+
+        const request = new greet.GreetEveryoneRequest();
+        request.setGreeting(greeting);
+
+        call.write(request);
+
+        await sleep(1000);
+    }
+
+    call.end();
+}
+
 function main() {
     // callLongGreet("directors", directors);
-    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    callComputeAverage(numbers);
+    // numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    // callComputeAverage(numbers);
+    callGreetEveryone();
 }
 
 main();
