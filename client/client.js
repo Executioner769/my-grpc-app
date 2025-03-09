@@ -136,8 +136,40 @@ function callPrimeNumberDecomposition(number) {
     });
 }
 
+function callComputeAverage(numbers) {
+    const client = new calculatorService.CalculatorServiceClient(
+        "localhost:50051",
+        grpc.credentials.createInsecure()
+    );
+
+    const request = new calculator.ComputeAverageRequest();
+
+    const call = client.computeAverage(request, (error, response) => {
+        if (!error) {
+            console.log("Average: " + response.getAverage());
+        } else {
+            console.error(error);
+        }
+    });
+
+    numbers.forEach((number, index) => {
+        const request = new calculator.ComputeAverageRequest();
+        request.setNumber(number);
+
+        console.log("Sent Number: " + number);
+
+        call.write(request);
+
+        if (index == numbers.length - 1) {
+            call.end(); // we have sent all the numbers
+        }
+    });
+}
+
 function main() {
-    callLongGreet("directors", directors);
+    // callLongGreet("directors", directors);
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    callComputeAverage(numbers);
 }
 
 main();

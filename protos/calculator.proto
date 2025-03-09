@@ -6,8 +6,19 @@ service CalculatorService {
     // unary API
     rpc Sum (SumRequest) returns (SumResponse) {};
 
-    // streaming API
+    // server streaming API
     rpc PrimeNumberDecomposition (PrimeNumberDecompositionRequest) returns (stream PrimeNumberDecompositionResponse);
+
+    // client streaming API
+    rpc ComputeAverage (stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+}
+
+message ComputeAverageRequest {
+    int64 number = 1;
+}
+
+message ComputeAverageResponse {
+    double average = 1;
 }
 
 message PrimeNumberDecompositionRequest {

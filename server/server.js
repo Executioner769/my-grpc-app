@@ -47,6 +47,29 @@ function primeNumberDecomposition(call, callback) {
     call.end(); // we have sent all the prime factors
 }
 
+function computeAverage(call, callback) {
+    let sum = 0,
+        count = 0;
+    call.on("data", (request) => {
+        const number = request.getNumber();
+        console.log(`Received Number ${count}: ${number}`);
+        sum += number;
+        count++;
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        const response = new calculator.ComputeAverageResponse();
+        const average = sum / count;
+        response.setAverage(average);
+
+        callback(null, response);
+    });
+}
+
 function greetManyTimes(call, callback) {
     const name =
         call.request.getGreeting().getFirstName() +
@@ -95,6 +118,7 @@ function main() {
     server.addService(calculatorService.CalculatorServiceService, {
         sum: sum,
         primeNumberDecomposition: primeNumberDecomposition,
+        computeAverage: computeAverage,
     });
     server.addService(greetService.GreetServiceService, {
         greetManyTimes: greetManyTimes,
