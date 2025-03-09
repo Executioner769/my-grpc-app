@@ -108,6 +108,43 @@ function callSum(num1, num2) {
     return result;
 }
 
+async function callFindMaximum() {
+    const client = new calculatorService.CalculatorServiceClient(
+        "localhost:50051",
+        grpc.credentials.createInsecure()
+    );
+
+    const request = new calculator.FindMaximumRequest();
+
+    const call = client.findMaximum(request, (error, response) => {});
+
+    call.on("data", (response) => {
+        console.log(`New Maximum is ${response.getMaximum()}`);
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        console.log("Server is completed sending messages!");
+    });
+
+    data = [3, 6, 17, 9, 8, 30];
+    for (let idx = 0; idx < data.length; idx++) {
+        const request = new calculator.FindMaximumRequest();
+        request.setNumber(data[idx]);
+
+        console.log(`Sending the number ${data[idx]}`);
+
+        call.write(request);
+
+        await sleep(1000);
+    }
+
+    call.end();
+}
+
 function callPrimeNumberDecomposition(number) {
     const client = new calculatorService.CalculatorServiceClient(
         "localhost:50051",
@@ -220,7 +257,8 @@ function main() {
     // callLongGreet("directors", directors);
     // numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     // callComputeAverage(numbers);
-    callGreetEveryone();
+    // callGreetEveryone();
+    callFindMaximum();
 }
 
 main();

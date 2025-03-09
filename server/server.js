@@ -70,6 +70,35 @@ function computeAverage(call, callback) {
     });
 }
 
+function findMaximum(call, callback) {
+    let maximum = -1,
+        number = 0;
+    call.on("data", (request) => {
+        number = request.getNumber();
+        console.log("Received: " + number);
+
+        if (number > maximum) {
+            maximum = number;
+
+            const response = new calculator.FindMaximumResponse();
+            response.setMaximum(maximum);
+
+            call.write(response);
+        } else {
+            // do nothing
+        }
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {
+        call.end();
+        console.log("I am done with my Job!");
+    });
+}
+
 function greetManyTimes(call, callback) {
     const name =
         call.request.getGreeting().getFirstName() +
@@ -154,6 +183,7 @@ function main() {
         sum: sum,
         primeNumberDecomposition: primeNumberDecomposition,
         computeAverage: computeAverage,
+        findMaximum: findMaximum,
     });
     server.addService(greetService.GreetServiceService, {
         greetManyTimes: greetManyTimes,

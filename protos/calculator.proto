@@ -11,6 +11,17 @@ service CalculatorService {
 
     // client streaming API
     rpc ComputeAverage (stream ComputeAverageRequest) returns (ComputeAverageResponse) {};
+
+    // bidirectional streaming AP
+    rpc FindMaximum (stream FindMaximumRequest) returns (stream FindMaximumResponse);
+}
+
+message FindMaximumRequest {
+    int64 number = 1;
+}
+
+message FindMaximumResponse {
+    int64 maximum = 1;
 }
 
 message ComputeAverageRequest {
