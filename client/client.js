@@ -12,6 +12,31 @@ const pid = process.pid;
 
 const grpc = require("@grpc/grpc-js");
 
+function getRPCDeadline(rpcType) {
+    // milliseconds
+    timeAllowed = 5000;
+
+    switch (rpcType) {
+        case "Unary":
+            timeAllowed = 5000;
+            break;
+        case "ServerStreaming":
+            timeAllowed = 7000;
+            break;
+        case "ClientStreaming":
+            timeAllowed = 6000;
+            break;
+        case "BiDiStreaming":
+            timeAllowed = 8000;
+            break;
+        default:
+            timeAllowed = 5000;
+            break;
+    }
+
+    return new Date(Date.now() + timeAllowed);
+}
+
 function callGreetManyTimes(firstName, lastName) {
     const client = new greetService.GreetServiceClient(
         "localhost:50051",
@@ -109,6 +134,8 @@ function callSum(num1, num2) {
 }
 
 function callSquareRoot(number) {
+    const deadline = getRPCDeadline("Unary");
+
     const client = new calculatorService.CalculatorServiceClient(
         "localhost:50051",
         grpc.credentials.createInsecure()
@@ -117,7 +144,7 @@ function callSquareRoot(number) {
     const request = new calculator.SquareRootRequest();
     request.setNumber(number);
 
-    client.squareRoot(request, (error, response) => {
+    client.squareRoot(request, { deadline: deadline }, (error, response) => {
         if (!error) {
             console.log(`Square Root Result: ${response.getSquareRoot()}`);
         } else {
