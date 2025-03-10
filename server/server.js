@@ -6,6 +6,8 @@ const greetService = require("./protos/greet_grpc_pb");
 
 const grpc = require("@grpc/grpc-js");
 
+const fs = require("fs");
+
 function sum(call, callback) {
     const sumResponse = new calculator.SumResponse();
     sumResponse.setNumber(
@@ -200,6 +202,21 @@ async function greetEveryone(call, callback) {
 }
 
 function main() {
+    // console.log(process.cwd());
+
+    const credentials = grpc.ServerCredentials.createSsl(
+        fs.readFileSync("./certs/ca.crt"),
+        [
+            {
+                cert_chain: fs.readFileSync("./certs/server.crt"),
+                private_key: fs.readFileSync("./certs/server.key"),
+            },
+        ],
+        true
+    );
+
+    const unsafeCredentials = grpc.ServerCredentials.createInsecure();
+
     const server = new grpc.Server();
     server.addService(calculatorService.CalculatorServiceService, {
         sum: sum,
@@ -213,16 +230,12 @@ function main() {
         longGreet: longGreet,
         greetEveryone: greetEveryone,
     });
-    server.bindAsync(
-        "127.0.0.1:50051",
-        grpc.ServerCredentials.createInsecure(),
-        (err, port) => {
-            if (err != null) {
-                return console.error(err);
-            }
-            console.log(`gRPC Server listening on ${port}`);
+    server.bindAsync("127.0.0.1:50051", credentials, (err, port) => {
+        if (err != null) {
+            return console.error(err);
         }
-    );
+        console.log(`gRPC Server listening on ${port}`);
+    });
 }
 
 main();

@@ -4,6 +4,8 @@ const calculatorService = require("../server/protos/calculator_grpc_pb");
 const greet = require("../server/protos/greet_pb");
 const greetService = require("../server/protos/greet_grpc_pb");
 
+const fs = require("fs");
+
 const directors = require("./data/directors.json");
 
 const process = require("process");
@@ -11,6 +13,14 @@ const process = require("process");
 const pid = process.pid;
 
 const grpc = require("@grpc/grpc-js");
+
+const credentials = grpc.credentials.createSsl(
+    fs.readFileSync("./certs/ca.crt"),
+    fs.readFileSync("./certs/client.key"),
+    fs.readFileSync("./certs/client.crt")
+);
+
+const unsafeCredentials = grpc.credentials.createInsecure();
 
 function getRPCDeadline(rpcType) {
     // milliseconds
@@ -112,7 +122,7 @@ function callLongGreet(category, names) {
 function callSum(num1, num2) {
     const client = new calculatorService.CalculatorServiceClient(
         "localhost:50051",
-        grpc.credentials.createInsecure()
+        credentials
     );
 
     const request = new calculator.SumRequest();
@@ -299,12 +309,13 @@ async function callGreetEveryone() {
 }
 
 function main() {
+    callSum(100, 43);
     // callLongGreet("directors", directors);
     // numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     // callComputeAverage(numbers);
     // callGreetEveryone();
     // callFindMaximum();
-    callSquareRoot(-1);
+    // callSquareRoot(-1);
 }
 
 main();
