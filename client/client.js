@@ -108,6 +108,24 @@ function callSum(num1, num2) {
     return result;
 }
 
+function callSquareRoot(number) {
+    const client = new calculatorService.CalculatorServiceClient(
+        "localhost:50051",
+        grpc.credentials.createInsecure()
+    );
+
+    const request = new calculator.SquareRootRequest();
+    request.setNumber(number);
+
+    client.squareRoot(request, (error, response) => {
+        if (!error) {
+            console.log(`Square Root Result: ${response.getSquareRoot()}`);
+        } else {
+            console.error(error.message);
+        }
+    });
+}
+
 async function callFindMaximum() {
     const client = new calculatorService.CalculatorServiceClient(
         "localhost:50051",
@@ -258,7 +276,8 @@ function main() {
     // numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     // callComputeAverage(numbers);
     // callGreetEveryone();
-    callFindMaximum();
+    // callFindMaximum();
+    callSquareRoot(-1);
 }
 
 main();
