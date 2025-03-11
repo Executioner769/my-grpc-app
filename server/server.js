@@ -4,9 +4,71 @@ const calculatorService = require("./protos/calculator_grpc_pb");
 const greet = require("./protos/greet_pb");
 const greetService = require("./protos/greet_grpc_pb");
 
+const proto_blog = require("./protos/blog_pb");
+const blogService = require("./protos/blog_grpc_pb");
+
 const grpc = require("@grpc/grpc-js");
 
 const fs = require("fs");
+
+// Knex Requires
+const environment = process.env.NODE_ENV || "development";
+const config = require("./knexfile")[environment];
+const knex = require("knex")(config);
+
+function listBlogs(call, callback) {
+    // get all the blogs from the database
+    knex("blogs")
+        .select("*")
+        .then((blogs) => {
+            blogs.forEach((blog) => {
+                const blogObject = new proto_blog.Blog();
+                blogObject.setId(blog.id);
+                blogObject.setAuthor(blog.author);
+                blogObject.setTitle(blog.title);
+                blogObject.setContent(blog.content);
+
+                const response = new proto_blog.ListBlogsResponse();
+                response.setBlog(blogObject);
+
+                call.write(response);
+            });
+            call.end(); // all blogs have been sent
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+function createBlog(call, callback) {
+    const blog = call.request.getBlog();
+
+    knex("blogs")
+        .insert({
+            author: blog.getAuthor(),
+            title: blog.getTitle(),
+            content: blog.getContent(),
+        })
+        .then(() => {
+            const id = blog.getId();
+            console.log(`Blog has been created`);
+
+            const newBlog = new proto_blog.Blog();
+            newBlog.setId(id);
+            newBlog.setAuthor(blog.getAuthor());
+            newBlog.setTitle(blog.getTitle());
+            newBlog.setContent(blog.getContent());
+
+            const response = new proto_blog.CreateBlogResponse();
+            response.setBlog(newBlog);
+
+            callback(null, response);
+        })
+        .catch((error) => {
+            console.error(error);
+            callback(error, null);
+        });
+}
 
 function sum(call, callback) {
     const sumResponse = new calculator.SumResponse();
@@ -218,19 +280,23 @@ function main() {
     const unsafeCredentials = grpc.ServerCredentials.createInsecure();
 
     const server = new grpc.Server();
-    server.addService(calculatorService.CalculatorServiceService, {
-        sum: sum,
-        primeNumberDecomposition: primeNumberDecomposition,
-        computeAverage: computeAverage,
-        findMaximum: findMaximum,
-        squareRoot: squareRoot,
+    server.addService(blogService.BlogServiceService, {
+        listBlogs: listBlogs,
+        createBlog: createBlog,
     });
-    server.addService(greetService.GreetServiceService, {
-        greetManyTimes: greetManyTimes,
-        longGreet: longGreet,
-        greetEveryone: greetEveryone,
-    });
-    server.bindAsync("127.0.0.1:50051", credentials, (err, port) => {
+    // server.addService(calculatorService.CalculatorServiceService, {
+    //     sum: sum,
+    //     primeNumberDecomposition: primeNumberDecomposition,
+    //     computeAverage: computeAverage,
+    //     findMaximum: findMaximum,
+    //     squareRoot: squareRoot,
+    // });
+    // server.addService(greetService.GreetServiceService, {
+    //     greetManyTimes: greetManyTimes,
+    //     longGreet: longGreet,
+    //     greetEveryone: greetEveryone,
+    // });
+    server.bindAsync("127.0.0.1:50051", unsafeCredentials, (err, port) => {
         if (err != null) {
             return console.error(err);
         }

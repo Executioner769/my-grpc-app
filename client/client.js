@@ -4,6 +4,9 @@ const calculatorService = require("../server/protos/calculator_grpc_pb");
 const greet = require("../server/protos/greet_pb");
 const greetService = require("../server/protos/greet_grpc_pb");
 
+const blog = require("../server/protos/blog_pb");
+const blogService = require("../server/protos/blog_grpc_pb");
+
 const fs = require("fs");
 
 const directors = require("./data/directors.json");
@@ -45,6 +48,56 @@ function getRPCDeadline(rpcType) {
     }
 
     return new Date(Date.now() + timeAllowed);
+}
+
+function callListBlogs() {
+    const client = new blogService.BlogServiceClient(
+        "localhost:50051",
+        unsafeCredentials
+    );
+
+    const request = new blog.ListBlogsRequest();
+
+    const call = client.listBlogs(request, (error, response) => {});
+
+    call.on("data", (response) => {
+        console.log(
+            "Client Streaming Response: ",
+            response.getBlog().toString() + "\n"
+        );
+    });
+
+    call.on("error", (error) => {
+        console.error(error);
+    });
+
+    call.on("end", () => {});
+}
+
+function callCreateBlog() {
+    const client = new blogService.BlogServiceClient(
+        "localhost:50051",
+        unsafeCredentials
+    );
+
+    const newBlog = new blog.Blog();
+    newBlog.setAuthor("Stephane Maarek");
+    newBlog.setTitle("New Blog!");
+    newBlog.setContent("Hello, World! This is my first blog post!");
+
+    const request = new blog.CreateBlogRequest();
+    request.setBlog(newBlog);
+
+    client.createBlog(request, (error, response) => {
+        if (!error) {
+            console.log(
+                "Received create blog response",
+                response.getBlog().toString()
+            );
+        } else {
+            console.error(error);
+        }
+    });
 }
 
 function callGreetManyTimes(firstName, lastName) {
@@ -122,7 +175,7 @@ function callLongGreet(category, names) {
 function callSum(num1, num2) {
     const client = new calculatorService.CalculatorServiceClient(
         "localhost:50051",
-        credentials
+        unsafeCredentials
     );
 
     const request = new calculator.SumRequest();
@@ -309,13 +362,8 @@ async function callGreetEveryone() {
 }
 
 function main() {
-    callSum(100, 43);
-    // callLongGreet("directors", directors);
-    // numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    // callComputeAverage(numbers);
-    // callGreetEveryone();
-    // callFindMaximum();
-    // callSquareRoot(-1);
+    callCreateBlog();
+    // callListBlogs();
 }
 
 main();
