@@ -100,6 +100,29 @@ function callCreateBlog() {
     });
 }
 
+function callReadBlog(blogId) {
+    const client = new blogService.BlogServiceClient(
+        "localhost:50051",
+        unsafeCredentials
+    );
+
+    const request = new blog.ReadBlogRequest();
+
+    request.setBlogId(blogId);
+
+    client.readBlog(request, (error, response) => {
+        if (!error) {
+            console.log("Blog: " + response.getBlog().toString());
+        } else {
+            if (error.code === grpc.status.NOT_FOUND) {
+                console.log(`Blog with id ${blogId} does not exist`);
+            } else {
+                console.log(error);
+            }
+        }
+    });
+}
+
 function callGreetManyTimes(firstName, lastName) {
     const client = new greetService.GreetServiceClient(
         "localhost:50051",
@@ -362,8 +385,9 @@ async function callGreetEveryone() {
 }
 
 function main() {
-    callCreateBlog();
+    // callCreateBlog();
     // callListBlogs();
+    callReadBlog(30);
 }
 
 main();

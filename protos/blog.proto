@@ -3,9 +3,11 @@ syntax = "proto3";
 package blog;
 
 service BlogService {
-    rpc ListBlogs (ListBlogsRequest) returns (stream ListBlogsResponse);
+    rpc ListBlogs (ListBlogsRequest) returns (stream ListBlogsResponse) {};
 
-    rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse);
+    rpc CreateBlog (CreateBlogRequest) returns (CreateBlogResponse) {};
+
+    rpc ReadBlog (ReadBlogRequest) returns (ReadBlogResponse) {};
 }
 
 message Blog {
@@ -13,6 +15,14 @@ message Blog {
     string author = 2;
     string title = 3;
     string content = 4;
+}
+
+message ReadBlogRequest {
+    int64 blog_id = 1;
+}
+
+message ReadBlogResponse {
+    Blog blog = 1;
 }
 
 message CreateBlogRequest {

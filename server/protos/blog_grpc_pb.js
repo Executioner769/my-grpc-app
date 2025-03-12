@@ -56,6 +56,32 @@ function deserialize_blog_ListBlogsResponse(buffer_arg) {
     );
 }
 
+function serialize_blog_ReadBlogRequest(arg) {
+    if (!(arg instanceof protos_blog_pb.ReadBlogRequest)) {
+        throw new Error("Expected argument of type blog.ReadBlogRequest");
+    }
+    return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_blog_ReadBlogRequest(buffer_arg) {
+    return protos_blog_pb.ReadBlogRequest.deserializeBinary(
+        new Uint8Array(buffer_arg)
+    );
+}
+
+function serialize_blog_ReadBlogResponse(arg) {
+    if (!(arg instanceof protos_blog_pb.ReadBlogResponse)) {
+        throw new Error("Expected argument of type blog.ReadBlogResponse");
+    }
+    return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_blog_ReadBlogResponse(buffer_arg) {
+    return protos_blog_pb.ReadBlogResponse.deserializeBinary(
+        new Uint8Array(buffer_arg)
+    );
+}
+
 var BlogServiceService = (exports.BlogServiceService = {
     listBlogs: {
         path: "/blog.BlogService/ListBlogs",
@@ -78,6 +104,17 @@ var BlogServiceService = (exports.BlogServiceService = {
         requestDeserialize: deserialize_blog_CreateBlogRequest,
         responseSerialize: serialize_blog_CreateBlogResponse,
         responseDeserialize: deserialize_blog_CreateBlogResponse,
+    },
+    readBlog: {
+        path: "/blog.BlogService/ReadBlog",
+        requestStream: false,
+        responseStream: false,
+        requestType: protos_blog_pb.ReadBlogRequest,
+        responseType: protos_blog_pb.ReadBlogResponse,
+        requestSerialize: serialize_blog_ReadBlogRequest,
+        requestDeserialize: deserialize_blog_ReadBlogRequest,
+        responseSerialize: serialize_blog_ReadBlogResponse,
+        responseDeserialize: deserialize_blog_ReadBlogResponse,
     },
 });
 

@@ -70,6 +70,33 @@ function createBlog(call, callback) {
         });
 }
 
+function readBlog(call, callback) {
+    const blogId = call.request.getBlogId();
+
+    knex("blogs")
+        .where({ id: blogId })
+        .then((data) => {
+            if (data.length) {
+                const newBlog = new proto_blog.Blog();
+
+                newBlog.setId(blogId);
+                newBlog.setTitle(data[0].title);
+                newBlog.setAuthor(data[0].author);
+                newBlog.setContent(data[0].content);
+
+                const response = new proto_blog.ReadBlogResponse();
+                response.setBlog(newBlog);
+
+                callback(null, response);
+            } else {
+                return callback({
+                    code: grpc.status.NOT_FOUND,
+                    message: `Blog with ${blogId} does not exist.`,
+                });
+            }
+        });
+}
+
 function sum(call, callback) {
     const sumResponse = new calculator.SumResponse();
     sumResponse.setNumber(
@@ -283,6 +310,7 @@ function main() {
     server.addService(blogService.BlogServiceService, {
         listBlogs: listBlogs,
         createBlog: createBlog,
+        readBlog: readBlog,
     });
     // server.addService(calculatorService.CalculatorServiceService, {
     //     sum: sum,
