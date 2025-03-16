@@ -97,6 +97,67 @@ function readBlog(call, callback) {
         });
 }
 
+function updateBlog(call, callback) {
+    const blogId = call.request.getBlog().getId();
+
+    knex("blogs")
+        .where({ id: blogId })
+        .update({
+            author: call.request.getBlog().getAuthor(),
+            title: call.request.getBlog().getTitle(),
+            content: call.request.getBlog().getContent(),
+        })
+        .returning()
+        .then((data) => {
+            if (data) {
+                const newBlog = new proto_blog.Blog();
+                newBlog.setId(blogId);
+                newBlog.setAuthor(data.author);
+                newBlog.setTitle(data.title);
+                newBlog.setContent(data.content);
+
+                const response = new proto_blog.UpdateBlogResponse();
+                response.setBlog(newBlog);
+
+                callback(null, response);
+            } else {
+                return callback({
+                    code: grpc.status.NOT_FOUND,
+                    message: `Blog with ${blogId} does not exist.`,
+                });
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            return callback({
+                code: grpc.status.INTERNAL,
+                message: "An error occurred while updating the blog.",
+            });
+        });
+}
+
+function deleteBlog(call, callback) {
+    const blogId = call.request.getBlogId();
+
+    knex("blogs")
+        .where({ id: blogId })
+        .delete()
+        .returning()
+        .then((data) => {
+            if (data) {
+                const response = new proto_blog.DeleteBlogResponse();
+                response.setBlogId(blogId);
+
+                callback(null, response);
+            } else {
+                return callback({
+                    code: grpc.status.NOT_FOUND,
+                    message: `Blog with ${blogId} does not exist.`,
+                });
+            }
+        });
+}
+
 function sum(call, callback) {
     const sumResponse = new calculator.SumResponse();
     sumResponse.setNumber(
@@ -311,6 +372,8 @@ function main() {
         listBlogs: listBlogs,
         createBlog: createBlog,
         readBlog: readBlog,
+        updateBlog: updateBlog,
+        deleteBlog: deleteBlog,
     });
     // server.addService(calculatorService.CalculatorServiceService, {
     //     sum: sum,

@@ -123,6 +123,59 @@ function callReadBlog(blogId) {
     });
 }
 
+function callUpdateBlog(blogId) {
+    const client = new blogService.BlogServiceClient(
+        "localhost:50051",
+        unsafeCredentials
+    );
+
+    const request = new blog.UpdateBlogRequest();
+
+    const newBlog = new blog.Blog();
+    newBlog.setId(blogId);
+    newBlog.setAuthor("Charlie Brown");
+    newBlog.setTitle("My First Blog (edited)");
+    newBlog.setContent(
+        "This is the content of my blog! I have updated this blog post!"
+    );
+
+    request.setBlog(newBlog);
+
+    client.updateBlog(request, (error, response) => {
+        if (!error) {
+            console.log("Updated Blog: ", response.getBlog().toString());
+        } else {
+            if (error.code === grpc.status.NOT_FOUND) {
+                console.log(`Blog with id ${blogId} does not exist`);
+            } else {
+                console.error(error);
+            }
+        }
+    });
+}
+
+function callDeleteBlog(blogId) {
+    const client = new blogService.BlogServiceClient(
+        "localhost:50051",
+        unsafeCredentials
+    );
+
+    const request = new blog.DeleteBlogRequest();
+    request.setBlogId(blogId);
+
+    client.deleteBlog(request, (error, response) => {
+        if (!error) {
+            console.log(`Deleted blog with id ${response.getBlogId()}`);
+        } else {
+            if (error.code == grpc.status.NOT_FOUND) {
+                console.log(`Blog with id ${blogId} does not exist`);
+            } else {
+                console.error(error);
+            }
+        }
+    });
+}
+
 function callGreetManyTimes(firstName, lastName) {
     const client = new greetService.GreetServiceClient(
         "localhost:50051",
@@ -387,7 +440,9 @@ async function callGreetEveryone() {
 function main() {
     // callCreateBlog();
     // callListBlogs();
-    callReadBlog(30);
+    // callReadBlog(30);
+    // callUpdateBlog(5);
+    // callDeleteBlog(4);
 }
 
 main();
